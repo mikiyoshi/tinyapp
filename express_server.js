@@ -43,8 +43,12 @@ app.get('/fetch', (req, res) => {
 //   res.render('urls_index', templateVars);
 // });
 app.post('/urls', (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send('Ok'); // Respond with 'Ok' (we will replace this)
+  // console.log(req.body);
+  // console.log(req.body.longURL);
+  let shortU = generateRandomString();
+  urlDatabase[`${shortU}`] = req.body.longURL;
+  console.log(urlDatabase);
+  res.redirect(`/urls/${shortU}`);
 });
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
@@ -60,4 +64,10 @@ function generateRandomString() {
   var random = Math.random().toString(36).slice(7);
   // console.log(random);
   return random;
+  // cb(random);
 }
+app.get('/u/:shortURL', (req, res) => {
+  // const longURL = ...
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
