@@ -38,15 +38,15 @@ app.get('/fetch', (req, res) => {
   res.send(`a = ${a}`);
 });
 
-// app.get('/urls', (req, res) => {
-//   const templateVars = { urls: urlDatabase };
-//   res.render('urls_index', templateVars);
-// });
+app.get('/urls', (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars);
+});
 app.post('/urls', (req, res) => {
   // console.log(req.body);
   // console.log(req.body.longURL);
   let shortU = generateRandomString();
-  urlDatabase[`${shortU}`] = req.body.longURL;
+  urlDatabase[shortU] = req.body.longURL;
   console.log(urlDatabase);
   res.redirect(`/urls/${shortU}`);
 });
@@ -70,4 +70,11 @@ app.get('/u/:shortURL', (req, res) => {
   // const longURL = ...
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
+});
+
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const idToDelete = req.params.shortURL;
+  delete urlDatabase[idToDelete];
+  console.log(urlDatabase);
+  res.redirect(`/urls`);
 });
