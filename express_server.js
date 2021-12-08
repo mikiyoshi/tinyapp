@@ -11,6 +11,17 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com',
 };
 
+//
+//  MIDDLEWARE
+//
+
+// app.use(morgan('dev'));
+// app.use(bodyParser.urlencoded({ extended: false }));
+
+//
+//
+//
+
 app.get('/', (req, res) => {
   res.send('Hello!');
 });
@@ -38,18 +49,33 @@ app.get('/fetch', (req, res) => {
   res.send(`a = ${a}`);
 });
 
+//
+// ROUTES
+//
+
+//
+// BROWSE  New Object to get from urlDatabase to templateVars
+//
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
+
+//
+// READ
+//
 app.post('/urls', (req, res) => {
   // console.log(req.body);
   // console.log(req.body.longURL);
   let shortU = generateRandomString();
   urlDatabase[shortU] = req.body.longURL;
-  console.log(urlDatabase);
+  // console.log(urlDatabase);
   res.redirect(`/urls/${shortU}`);
 });
+
+//
+// ADD
+//
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
 });
@@ -58,6 +84,7 @@ app.get('/urls/:shortURL', (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
+  console.log(templateVars);
   res.render('urls_show', templateVars);
 });
 function generateRandomString() {
@@ -72,9 +99,32 @@ app.get('/u/:shortURL', (req, res) => {
   res.redirect(longURL);
 });
 
+//
+// DELITE
+//
 app.post('/urls/:shortURL/delete', (req, res) => {
   const idToDelete = req.params.shortURL;
   delete urlDatabase[idToDelete];
   console.log(urlDatabase);
   res.redirect(`/urls`);
+});
+
+//
+// EDIT
+//
+// app.get('/urls/:id', (req, res) => {
+//   const id = req.params.shortURL;
+//   const templateVars = {
+//     shortURL: id,
+//     longURL: urlDatabase[req.params.shortURL],
+//   };
+//   res.render('/urls', templateVars);
+// });
+
+app.post('/urls/:id', (req, res) => {
+  const id = req.params.id;
+  console.log(`editid: ${id}`);
+  urlDatabase[id] = req.body.longURL;
+  // console.log(urlDatabase);
+  res.render('/urls', req.body);
 });
