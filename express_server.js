@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
@@ -12,12 +13,33 @@ const urlDatabase = {
 };
 
 //
+//  LOGIN INFO
+//
+const users = {
+  abcd: {
+    username: 'abcd',
+    email: 'abcd@example.com',
+    password: 'zzzz',
+  },
+};
+
+const findUserByUsername = (username) => {
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.username === username) {
+      return user;
+    }
+  }
+  return null;
+};
+
+//
 //  MIDDLEWARE
 //
 
 // app.use(morgan('dev'));
-// app.use(bodyParser.urlencoded({ extended: false }));
-
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 //
 //
 //
@@ -57,7 +79,11 @@ app.get('/fetch', (req, res) => {
 // BROWSE  New Object to get from urlDatabase to templateVars
 //
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const username = req.cookies.username;
+  const templateVars = {
+    urls: urlDatabase,
+    username: username,
+  };
   res.render('urls_index', templateVars);
 });
 
@@ -77,7 +103,12 @@ app.post('/urls', (req, res) => {
 // ADD
 //
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const username = req.cookies.username;
+  const templateVars = {
+    urls: urlDatabase,
+    username: username,
+  };
+  res.render('urls_new', templateVars);
 });
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
@@ -112,19 +143,58 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 //
 // EDIT
 //
-// app.get('/urls/:id', (req, res) => {
-//   const id = req.params.shortURL;
-//   const templateVars = {
-//     shortURL: id,
-//     longURL: urlDatabase[req.params.shortURL],
-//   };
-//   res.render('/urls', templateVars);
-// });
-
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   console.log(`editid: ${id}`);
   urlDatabase[id] = req.body.longURL;
   // console.log(urlDatabase);
   res.render('/urls', req.body);
+});
+
+//
+// LOGIN
+//
+app.post('/login', (req, res) => {
+  // console.log(req.body);
+  // const email = req.body.email;
+  // const password = req.body.password;
+
+  const username = req.body.username;
+  console.log('username', username);
+
+  if (!username) {
+    return res.status(400).send('username cannot be blank');
+  }
+
+  const user = findUserByUsername(username);
+  console.log('user', user);
+
+  if (!user) {
+    return res.status(400).send("a username doesn't exist");
+  }
+
+  if (user.username !== username) {
+    return res.status(400).send('your username doesnt match');
+  }
+  // res.cookie('username', username).send('cookie set'); //Sets name = express
+  res.cookie('username', username);
+  const templateVars = {
+    username: username,
+    urls: urlDatabase,
+  };
+  // users[username] = {
+  //   username: username,
+  // };
+  res.render('urls_index', templateVars);
+
+  // happy path
+  // res.cookie('user_id', user.id);
+  // res.redirect('/secrets');
+
+  // res.send('you posted to login')
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
 });
