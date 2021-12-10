@@ -33,10 +33,19 @@ const users = {
   },
 };
 
-const findUserByUsername = (username) => {
+const findUserByEmail = (email) => {
   for (const userId in users) {
     const user = users[userId];
-    if (user.username === username) {
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+};
+const findUserById = (id) => {
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.id === id) {
       return user;
     }
   }
@@ -89,10 +98,10 @@ app.get('/fetch', (req, res) => {
 // BROWSE  New Object to get from urlDatabase to templateVars
 //
 app.get('/urls', (req, res) => {
-  const username = req.cookies.username;
+  const id = req.cookies.id;
   const templateVars = {
     urls: urlDatabase,
-    id: username,
+    id: id,
   };
   res.render('urls_index', templateVars);
 });
@@ -113,10 +122,10 @@ app.post('/urls', (req, res) => {
 // ADD
 //
 app.get('/urls/new', (req, res) => {
-  const username = req.cookies.username;
+  const id = req.cookies.id;
   const templateVars = {
     urls: urlDatabase,
-    id: username,
+    id: id,
   };
   res.render('urls_new', templateVars);
 });
@@ -147,7 +156,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const idToDelete = req.params.shortURL;
   delete urlDatabase[idToDelete];
   console.log(urlDatabase);
-  res.redirect('/urls');
+  res.redirect(`/urls`);
 });
 
 //
@@ -165,30 +174,26 @@ app.post('/urls/:id', (req, res) => {
 // LOGIN
 //
 app.post('/login', (req, res) => {
-  // console.log(req.body);
-  // const email = req.body.email;
-  // const password = req.body.password;
+  const id = req.body.id;
+  console.log('id', id);
 
-  const username = req.body.username;
-  console.log('username', username);
-
-  if (!username) {
-    return res.status(400).send('username cannot be blank');
+  if (!id) {
+    return res.status(400).send('id cannot be blank');
   }
 
-  const user = findUserByUsername(username);
+  const user = findUserById(id);
   console.log('user', user);
 
   if (!user) {
-    return res.status(400).send("a username doesn't exist");
+    return res.status(400).send("a id doesn't exist");
   }
 
-  if (user.username !== username) {
-    return res.status(400).send('your username doesnt match');
+  if (user.id !== id) {
+    return res.status(400).send('your id doesnt match');
   }
-  res.cookie('username', username);
+  res.cookie('id', id);
   const templateVars = {
-    id: username,
+    id: id,
     urls: urlDatabase,
   };
   res.render('urls_index', templateVars);
@@ -229,15 +234,19 @@ app.post('/register', (req, res) => {
     email: email,
     password: password,
   };
-
-  console.log('users', users);
-  res.redirect('/login');
+  const templateVars = {
+    id: id,
+    urls: urlDatabase,
+  };
+  console.log('users', templateVars);
+  res.render('urls_index', templateVars);
+  // res.redirect('/login');
 });
 app.get('/register', (req, res) => {
   res.render('register');
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('id');
   res.redirect('/urls');
 });
