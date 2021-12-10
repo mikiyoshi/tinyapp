@@ -20,30 +20,38 @@
 
   <body>
     <%- include('partials/_header') %>
+
     <main style="margin: 1em">
       <h3>Login TinyURL</h3>
-      <form class="form-inline" action="/login" method="POST">
-        <div class="form-group mb-2">
-          <label for="longURL">Email:</label>
-          <input
-            class="form-control"
-            type="email"
-            name="email"
-            placeholder="xyz@example.com'"
-            style="width: 300px; margin: 1em"
-          />
-          <label for="longURL">Password:</label>
-          <input
-            class="form-control"
-            type="password"
-            name="password"
-            placeholder="password"
-            style="width: 300px; margin: 1em"
-          />
-          <input type="hidden" name="id" value="" />
-          <button type="submit" class="btn btn-primary">Login</button>
+      <div class="container">
+        <div class="row justify-content-md-center">
+          <div class="col-sm-6">
+            <form action="/login" method="POST">
+              <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label>
+                <input
+                  class="form-control"
+                  type="email"
+                  name="email"
+                  placeholder="xyz@example.com'"
+                />
+              </div>
+              <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <input
+                  class="form-control"
+                  type="password"
+                  name="password"
+                  placeholder="password"
+                />
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                Login
+              </button>
+            </form>
+          </div>
         </div>
-      </form>
+      </div>
     </main>
     <!-- Bootstrap JS -->
     <script

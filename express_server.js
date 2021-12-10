@@ -98,10 +98,10 @@ app.get('/fetch', (req, res) => {
 // BROWSE  New Object to get from urlDatabase to templateVars
 //
 app.get('/urls', (req, res) => {
-  const id = req.cookies.id;
+  const email = req.cookies.email;
   const templateVars = {
     urls: urlDatabase,
-    id: id,
+    email: email,
   };
   res.render('urls_index', templateVars);
 });
@@ -122,17 +122,19 @@ app.post('/urls', (req, res) => {
 // ADD
 //
 app.get('/urls/new', (req, res) => {
-  const id = req.cookies.id;
+  const email = req.cookies.email;
   const templateVars = {
     urls: urlDatabase,
-    id: id,
+    email: email,
   };
   res.render('urls_new', templateVars);
 });
 app.get('/urls/:shortURL', (req, res) => {
+  const email = req.cookies.email;
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
+    email: email,
   };
   console.log(templateVars);
   res.render('urls_show', templateVars);
@@ -273,7 +275,7 @@ app.post('/register', (req, res) => {
 
   const id = Math.floor(Math.random() * 2000) + 1;
 
-  res.cookie('id', id);
+  res.cookie('email', email);
   // const templateVars = {
   //   id: id,
   //   email: email,
@@ -287,6 +289,7 @@ app.post('/register', (req, res) => {
   };
   const templateVars = {
     id: users,
+    email: email,
     urls: urlDatabase,
   };
   console.log('users', templateVars);
@@ -318,13 +321,26 @@ app.get('/secrets', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  res.render('login');
+  const email = req.body.email;
+  const templateVars = {
+    email: email,
+    urls: urlDatabase,
+  };
+  res.render('login', templateVars);
+  // res.render('login');
 });
 app.get('/register', (req, res) => {
-  res.render('register');
+  const email = req.body.email;
+  const templateVars = {
+    email: email,
+    urls: urlDatabase,
+  };
+  res.render('register', templateVars);
+  // res.render('register');
 });
 
 app.post('/logout', (req, res) => {
   res.clearCookie('id');
-  res.redirect('/login');
+  res.clearCookie('email');
+  res.redirect('/urls');
 });

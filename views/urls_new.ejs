@@ -23,19 +23,26 @@
 
     <main style="margin: 1em">
       <h3>Create TinyURL</h3>
-      <form class="form-inline" action="/urls" method="POST">
-        <div class="form-group mb-2">
-          <label for="longURL">Enter a URL:</label>
-          <input
-            class="form-control"
-            type="text"
-            name="longURL"
-            placeholder="http://"
-            style="width: 300px; margin: 1em"
-          />
-          <button type="submit" class="btn btn-primary">Submit</button>
+      <div class="container">
+        <div class="row justify-content-md-center">
+          <div class="col-sm-6">
+            <form action="/urls" method="POST">
+              <div class="form-group">
+                <label for="exampleInputEmail1">Enter a URL</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  name="longURL"
+                  placeholder="http://"
+                />
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">
+                Submit
+              </button>
+            </form>
+          </div>
         </div>
-      </form>
+      </div>
     </main>
     <!-- Bootstrap JS -->
     <script
