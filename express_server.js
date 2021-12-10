@@ -8,8 +8,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
 const urlDatabase = {
-  b2xVn2: 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com',
+  // b2xVn2: 'http://www.lighthouselabs.ca',
+  // '9sm5xK': 'http://www.google.com',
+  b6UTxQ: {
+    longURL: 'https://www.tsn.ca',
+    userID: 'aJ48lW',
+  },
+  i3BoGr: {
+    longURL: 'https://www.google.ca',
+    userID: 'aJ48lW',
+  },
 };
 
 //
@@ -52,6 +60,15 @@ const findUserById = (id) => {
   return null;
 };
 
+const findDatabaseById = (id) => {
+  for (const databaseId in urlDatabase) {
+    const databese = urlDatabase[databaseId];
+    if (databese.id === id) {
+      return databese;
+    }
+  }
+  return null;
+};
 //
 //  MIDDLEWARE
 //
@@ -59,10 +76,10 @@ const findUserById = (id) => {
 // app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-//
-//
-//
 
+//
+// Home  get dispaly page
+//
 app.get('/', (req, res) => {
   res.send('Hello!');
 });
@@ -70,6 +87,10 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//
+// JSON  get dispaly page
+//
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
@@ -77,15 +98,25 @@ app.get('/urls.json', (req, res) => {
 //   res.send('<html><body>Hello <b>World</b></body></html>\n');
 // });
 
+//
+// Hello  get dispaly page
+//
 app.get('/hello', (req, res) => {
   const templateVars = { greeting: 'Hello World!' };
   res.render('hello_world', templateVars);
 });
+
+//
+// Set  get dispaly page
+//
 app.get('/set', (req, res) => {
   const a = 1;
   res.send(`a = ${a}`);
 });
 
+//
+// Fetch  get dispaly page
+//
 app.get('/fetch', (req, res) => {
   res.send(`a = ${a}`);
 });
@@ -119,35 +150,62 @@ app.post('/urls', (req, res) => {
 });
 
 //
-// ADD
+// ADD get dispaly page
 //
 app.get('/urls/new', (req, res) => {
   const email = req.cookies.email;
-  const templateVars = {
-    urls: urlDatabase,
-    email: email,
-  };
-  res.render('urls_new', templateVars);
+  console.log(email);
+
+  if (email) {
+    const templateVars = {
+      urls: urlDatabase,
+      email: email,
+    };
+    res.render('urls_new', templateVars);
+  }
+  res.redirect('/login');
 });
+
+//
+// short URL  get dispaly page
+//
 app.get('/urls/:shortURL', (req, res) => {
+  const id = req.body.id;
   const email = req.cookies.email;
-  const templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
-    email: email,
-  };
-  console.log(templateVars);
-  res.render('urls_show', templateVars);
+  // console.log(email);
+  // console.log(urlDatabase);
+  const database = findDatabaseById(id);
+  console.log('database', database);
+
+  if (email) {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: database.longURL,
+      email: email,
+    };
+    console.log(templateVars);
+    res.render('urls_show', templateVars);
+  }
+  res.redirect('/login');
 });
+
+//
+// Number generate
+//
 function generateRandomString() {
   var random = Math.random().toString(36).slice(7);
   // console.log(random);
   return random;
   // cb(random);
 }
+
+//
+// short URL page
+//
 app.get('/u/:shortURL', (req, res) => {
   // const longURL = ...
   const longURL = urlDatabase[req.params.shortURL];
+  console.log(longURL);
   res.redirect(longURL);
 });
 
@@ -155,10 +213,16 @@ app.get('/u/:shortURL', (req, res) => {
 // DELITE
 //
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const idToDelete = req.params.shortURL;
-  delete urlDatabase[idToDelete];
-  console.log(urlDatabase);
-  res.redirect(`/urls`);
+  const email = req.cookies.email;
+  console.log(email);
+
+  if (email) {
+    const idToDelete = req.params.shortURL;
+    delete urlDatabase[idToDelete];
+    console.log(urlDatabase);
+    res.redirect(`/urls`);
+  }
+  res.redirect('/login');
 });
 
 //
@@ -167,59 +231,18 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   console.log(`editid: ${id}`);
+  // const database = findDatabaseById(id);
+  // console.log('database', database);
+
   urlDatabase[id] = req.body.longURL;
-  // console.log(urlDatabase);
+  console.log(urlDatabase);
   res.render('/urls', req.body);
 });
 
 //
 // LOGIN
 //
-// app.post('/login', (req, res) => {
-//   console.log('req.body', req.body);
-//   const email = req.body.email;
-//   const password = req.body.password;
-
-//   if (!email || !password) {
-//     return res.status(400).send('email and password cannot be blank');
-//   }
-
-//   const user = findUserByEmail(email);
-//   console.log('user', user);
-
-//   if (!user) {
-//     return res.status(400).send("a user with that email doesn't exist");
-//   }
-
-//   if (user.password !== password) {
-//     return res.status(400).send('your password doesnt match');
-//   }
-
-//   // happy path
-//   res.cookie('id', id);
-//   res.redirect('/secrets');
-
-//   // res.send('you posted to login')
-// });
 app.post('/login', (req, res) => {
-  // const id = req.body.id;
-  // console.log('id', id);
-
-  // if (!id) {
-  //   return res.status(400).send('id cannot be blank');
-  // }
-
-  // const user = findUserById(id);
-  // console.log('user', user);
-
-  // if (!user) {
-  //   return res.status(400).send("a id doesn't exist");
-  // }
-
-  // if (user.id !== id) {
-  //   return res.status(400).send('your id doesnt match');
-  // }
-  // const id = req.body.id;
   const email = req.body.email;
   const password = req.body.password;
   // console.log(id);
@@ -240,12 +263,6 @@ app.post('/login', (req, res) => {
   if (user.password !== password) {
     return res.status(400).send('your password doesnt match');
   }
-  // res.cookie('id', id);
-  // const templateVars = {
-  //   id: users,
-  //   urls: urlDatabase,
-  // };
-  // res.render('urls_index', templateVars);
 
   // happy path
   res.cookie('id', user.id);
@@ -276,12 +293,6 @@ app.post('/register', (req, res) => {
   const id = Math.floor(Math.random() * 2000) + 1;
 
   res.cookie('email', email);
-  // const templateVars = {
-  //   id: id,
-  //   email: email,
-  //   password: password,
-  //   urls: urlDatabase,
-  // };
   users[id] = {
     id: id,
     email: email,
@@ -297,8 +308,12 @@ app.post('/register', (req, res) => {
   // res.redirect('/login');
 });
 
+//
+// secrets
+//
 app.get('/secrets', (req, res) => {
   const id = req.cookies.id;
+  const email = req.body.email;
 
   if (!id) {
     return res.status(401).send('you are not authorized to be here');
@@ -312,6 +327,7 @@ app.get('/secrets', (req, res) => {
       .send('you have a stale cookie. please create an account or login');
   }
 
+  res.cookie('email', email);
   console.log('the logged in user is', user);
   const templateVars = {
     email: user.email,
@@ -320,6 +336,9 @@ app.get('/secrets', (req, res) => {
   res.render('login', templateVars);
 });
 
+//
+// login get dispaly page
+//
 app.get('/login', (req, res) => {
   const email = req.body.email;
   const templateVars = {
@@ -329,6 +348,10 @@ app.get('/login', (req, res) => {
   res.render('login', templateVars);
   // res.render('login');
 });
+
+//
+// register get dispaly page
+//
 app.get('/register', (req, res) => {
   const email = req.body.email;
   const templateVars = {
@@ -339,6 +362,9 @@ app.get('/register', (req, res) => {
   // res.render('register');
 });
 
+//
+// logout
+//
 app.post('/logout', (req, res) => {
   res.clearCookie('id');
   res.clearCookie('email');
