@@ -17,26 +17,7 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <a class="nav-item nav-link" href="/register">Register</a>
-        <% if(!id){ %>
-        <form class="form-inline" action="/login" method="POST">
-          <div class="form-group mb-2">
-            <input
-              class="form-control"
-              type="text"
-              name="id"
-              placeholder="id"
-              style="margin: 1em"
-            />
-            <button type="submit" class="btn btn-primary">Login</button>
-          </div>
-        </form>
-        <div>
-          <% } else { %>
-          <p><%= id %></p>
-          <form method="POST" action="/logout">
-            <button type="submit" class="btn btn-primary">Logout</button>
-          </form>
-          <% } %>
+        <a class="nav-item nav-link" href="/Login">Login</a>
         </div>
       </div>
     </div>

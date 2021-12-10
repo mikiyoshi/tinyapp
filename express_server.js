@@ -173,40 +173,91 @@ app.post('/urls/:id', (req, res) => {
 //
 // LOGIN
 //
-app.post('/login', (req, res) => {
-  const id = req.body.id;
-  console.log('id', id);
+// app.post('/login', (req, res) => {
+//   console.log('req.body', req.body);
+//   const email = req.body.email;
+//   const password = req.body.password;
 
-  if (!id) {
-    return res.status(400).send('id cannot be blank');
+//   if (!email || !password) {
+//     return res.status(400).send('email and password cannot be blank');
+//   }
+
+//   const user = findUserByEmail(email);
+//   console.log('user', user);
+
+//   if (!user) {
+//     return res.status(400).send("a user with that email doesn't exist");
+//   }
+
+//   if (user.password !== password) {
+//     return res.status(400).send('your password doesnt match');
+//   }
+
+//   // happy path
+//   res.cookie('id', id);
+//   res.redirect('/secrets');
+
+//   // res.send('you posted to login')
+// });
+app.post('/login', (req, res) => {
+  // const id = req.body.id;
+  // console.log('id', id);
+
+  // if (!id) {
+  //   return res.status(400).send('id cannot be blank');
+  // }
+
+  // const user = findUserById(id);
+  // console.log('user', user);
+
+  // if (!user) {
+  //   return res.status(400).send("a id doesn't exist");
+  // }
+
+  // if (user.id !== id) {
+  //   return res.status(400).send('your id doesnt match');
+  // }
+  // const id = req.body.id;
+  const email = req.body.email;
+  const password = req.body.password;
+  // console.log(id);
+  console.log(email);
+  console.log(password);
+
+  if (!email || !password) {
+    return res.status(400).send('email and password cannot be blank');
   }
 
-  const user = findUserById(id);
+  const user = findUserByEmail(email);
   console.log('user', user);
 
   if (!user) {
-    return res.status(400).send("a id doesn't exist");
+    return res.status(400).send("a user with that email doesn't exist");
   }
 
-  if (user.id !== id) {
-    return res.status(400).send('your id doesnt match');
+  if (user.password !== password) {
+    return res.status(400).send('your password doesnt match');
   }
-  res.cookie('id', id);
-  const templateVars = {
-    id: id,
-    urls: urlDatabase,
-  };
-  res.render('urls_index', templateVars);
+  // res.cookie('id', id);
+  // const templateVars = {
+  //   id: users,
+  //   urls: urlDatabase,
+  // };
+  // res.render('urls_index', templateVars);
+
+  // happy path
+  res.cookie('id', user.id);
+  res.redirect('/secrets');
 });
 
 //
 // register
 //
 app.post('/register', (req, res) => {
-  // const username = req.body.username;
+  // const id = req.body.id;
   const email = req.body.email;
   const password = req.body.password;
-  // console.log('username', username);
+  // console.log('id', id);
   console.log('email', email);
   console.log('password', password);
 
@@ -222,9 +273,9 @@ app.post('/register', (req, res) => {
 
   const id = Math.floor(Math.random() * 2000) + 1;
 
-  // res.cookie('username', username);
+  res.cookie('id', id);
   // const templateVars = {
-  //   id: username,
+  //   id: id,
   //   email: email,
   //   password: password,
   //   urls: urlDatabase,
@@ -235,12 +286,39 @@ app.post('/register', (req, res) => {
     password: password,
   };
   const templateVars = {
-    id: id,
+    id: users,
     urls: urlDatabase,
   };
   console.log('users', templateVars);
   res.render('urls_index', templateVars);
   // res.redirect('/login');
+});
+
+app.get('/secrets', (req, res) => {
+  const id = req.cookies.id;
+
+  if (!id) {
+    return res.status(401).send('you are not authorized to be here');
+  }
+
+  const user = users[id];
+
+  if (!user) {
+    return res
+      .status(400)
+      .send('you have a stale cookie. please create an account or login');
+  }
+
+  console.log('the logged in user is', user);
+  const templateVars = {
+    email: user.email,
+  };
+
+  res.render('login', templateVars);
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
 });
 app.get('/register', (req, res) => {
   res.render('register');
@@ -248,5 +326,5 @@ app.get('/register', (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
