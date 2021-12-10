@@ -17,9 +17,19 @@ const urlDatabase = {
 //
 const users = {
   abcd: {
-    username: 'abcd',
+    id: 'abcd',
     email: 'abcd@example.com',
     password: 'zzzz',
+  },
+  userRandomID: {
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'purple-monkey-dinosaur',
+  },
+  user2RandomID: {
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'dishwasher-funk',
   },
 };
 
@@ -82,7 +92,7 @@ app.get('/urls', (req, res) => {
   const username = req.cookies.username;
   const templateVars = {
     urls: urlDatabase,
-    username: username,
+    id: username,
   };
   res.render('urls_index', templateVars);
 });
@@ -106,7 +116,7 @@ app.get('/urls/new', (req, res) => {
   const username = req.cookies.username;
   const templateVars = {
     urls: urlDatabase,
-    username: username,
+    id: username,
   };
   res.render('urls_new', templateVars);
 });
@@ -137,7 +147,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const idToDelete = req.params.shortURL;
   delete urlDatabase[idToDelete];
   console.log(urlDatabase);
-  res.redirect(`/urls`);
+  res.redirect('/urls');
 });
 
 //
@@ -176,22 +186,55 @@ app.post('/login', (req, res) => {
   if (user.username !== username) {
     return res.status(400).send('your username doesnt match');
   }
-  // res.cookie('username', username).send('cookie set'); //Sets name = express
   res.cookie('username', username);
   const templateVars = {
-    username: username,
+    id: username,
     urls: urlDatabase,
   };
-  // users[username] = {
-  //   username: username,
-  // };
   res.render('urls_index', templateVars);
+});
 
-  // happy path
-  // res.cookie('user_id', user.id);
-  // res.redirect('/secrets');
+//
+// register
+//
+app.post('/register', (req, res) => {
+  // const username = req.body.username;
+  const email = req.body.email;
+  const password = req.body.password;
+  // console.log('username', username);
+  console.log('email', email);
+  console.log('password', password);
 
-  // res.send('you posted to login')
+  if (!email || !password) {
+    return res.status(400).send('email and password cannot be blank');
+  }
+
+  const user = findUserByEmail(email);
+
+  if (user) {
+    return res.status(400).send('a user with that email already exists');
+  }
+
+  const id = Math.floor(Math.random() * 2000) + 1;
+
+  // res.cookie('username', username);
+  // const templateVars = {
+  //   id: username,
+  //   email: email,
+  //   password: password,
+  //   urls: urlDatabase,
+  // };
+  users[id] = {
+    id: id,
+    email: email,
+    password: password,
+  };
+
+  console.log('users', users);
+  res.redirect('/login');
+});
+app.get('/register', (req, res) => {
+  res.render('register');
 });
 
 app.post('/logout', (req, res) => {
