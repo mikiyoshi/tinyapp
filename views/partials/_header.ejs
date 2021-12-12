@@ -26,7 +26,7 @@
 
 
 
-      <% if(!email){ %>
+      <% if(!user){ %>
       <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
         <li class="nav-item">
           <a class="nav-link text-dark" href="/register">Register</a>
@@ -38,7 +38,7 @@
     <% } else { %>
       <div class="collapse navbar-collapse" id="navbarText"></div>
       <span class="navbar-text text-dark mr-3">
-        Logged in As: <%= email %>
+        Logged in As: <%= user.email %>
       </span>
     <form class="form-inline my-2 my-lg-0" method="POST" action="/logout">
       <button type="submit" class="btn btn-outline-dark my-2 my-sm-0">Logout</button>
