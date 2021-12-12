@@ -1,12 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-// const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 
+const { findUserByEmail } = require('./helpers');
 const app = express();
-// app.use(cookieParser());
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 app.set('view engine', 'ejs');
 app.use(
   bodyParser.urlencoded({
@@ -17,16 +16,13 @@ app.use(
   cookieSession({
     name: 'session',
     keys: ['key1', 'key2'],
-
-    // Cookie Options
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    maxAge: 24 * 60 * 60 * 1000,
   })
 );
 
 // generate random string for short url
 const generateRandomString = () => {
   let randomString = '';
-  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < 6; i++) {
     const randomCharCode = Math.floor(Math.random() * 26 + 97);
     const randomChar = String.fromCharCode(randomCharCode);
@@ -48,41 +44,11 @@ const urlDatabase = {
 };
 
 // user database
-const users = {
-  // abcd: {
-  //   id: 'abcd',
-  //   email: 'abcd@example.com',
-  //   password: 'zzzz',
-  // },
-  // userRandomID: {
-  //   id: 'userRandomID',
-  //   email: 'user@example.com',
-  //   password: 'purple-monkey-dinosaur',
-  // },
-  // user2RandomID: {
-  //   id: 'user2RandomID',
-  //   email: 'user2@example.com',
-  //   password: 'dishwasher-funk',
-  // },
-};
-
-// helper function: check email exists in database
-const findUserByEmail = (email, database) => {
-  for (const userId in database) {
-    const user = database[userId];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return false;
-};
+const users = {};
 
 // helper function: authenticate user
 const authenticateUser = (email, password, db) => {
-  // get user object
   const user = findUserByEmail(email, db);
-
-  // check that passwords match => return user object
   if (user && bcrypt.compareSync(password, user.password)) {
     return user;
   }
@@ -146,16 +112,12 @@ app.post('/urls', (request, response) => {
     longURL: request.body.longURL,
     userID,
   };
-
-  // console.log(request.body); // Log the POST request body to the console
   response.redirect(`/urls/${shortURL}`);
 });
 
-// key: request.params.shortURL
-// value: urlDatabase[request.params.shortURL]
+// key: request.params.shortURL, value: urlDatabase[request.params.shortURL]
 app.get('/urls/:shortURL', (request, response) => {
   const userID = request.session.user_id;
-  // const { longURL } = urlDatabase[request.params.shortURL];
   const templateVars = {
     shortURL: request.params.shortURL,
     longURL: urlDatabase[request.params.shortURL].longURL,
@@ -168,7 +130,6 @@ app.post('/urls/:shortURL/delete', (request, response) => {
   const userID = request.session.user_id;
   const { shortURL } = request.params;
 
-  // check to see if user can delete urls
   const userURLS = urlsForUser(userID, urlDatabase);
   if (Object.keys(userURLS).includes(shortURL)) {
     delete urlDatabase[shortURL];
@@ -183,7 +144,6 @@ app.post('/urls/:id', (request, response) => {
   const shortURL = request.params.id;
   const userID = request.session.user_id;
 
-  // check to see if user can edit urls
   const userURLS = urlsForUser(userID, urlDatabase);
   if (Object.keys(userURLS).includes(shortURL)) {
     urlDatabase[shortURL].longURL = longURL;
@@ -210,11 +170,10 @@ app.post('/login', (request, response) => {
   const user = authenticateUser(email, password, users);
 
   if (user) {
-    request.session.user_id = userID;
+    request.session.user_id = user.id;
     response.redirect('/urls');
     return;
   }
-  // user is not authenticated
   response.status(403).send('wrong credentials!');
 });
 
@@ -241,12 +200,10 @@ app.post('/register', (request, response) => {
 
   const userFound = findUserByEmail(userEmail, users);
 
-  // if email or password is blank send error
   if (userEmail === '' || userPass === '') {
     response.status(400).send('Please fill in all fields.');
   }
 
-  // if email already in database send error
   if (userFound) {
     response
       .status(400)
@@ -254,17 +211,13 @@ app.post('/register', (request, response) => {
     return;
   }
 
-  // create new user in database
   users[userID] = {
     id: userID,
     email: userEmail,
-    // hash password
     password: bcrypt.hashSync(userPass, 10),
   };
 
-  // create user id cookie
   request.session.user_id = userID;
-  // console.log(users);
   response.redirect('/urls');
 });
 
