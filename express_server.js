@@ -67,7 +67,13 @@ const urlsForUser = (id, urlDatabase) => {
 };
 
 app.get('/', (request, response) => {
-  response.send('Hello!');
+  // response.send('Hello!');
+  const userID = request.session.user_id;
+  if (userID) {
+    response.redirect('/urls');
+  } else {
+    response.redirect('/login');
+  }
 });
 
 app.get('/urls.json', (request, response) => {
