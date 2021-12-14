@@ -82,6 +82,7 @@ app.get('/urls', (request, response) => {
     urls: urlsForUser(userID, urlDatabase),
     user: users[userID],
   };
+  console.log('/urls : ', templateVars);
   response.render('urls_index', templateVars);
 });
 
@@ -101,13 +102,20 @@ app.get('/urls/new', (request, response) => {
 // redirect short urls
 app.get('/u/:shortURL', (request, response) => {
   const { longURL } = urlDatabase[request.params.shortURL];
-  response.redirect(longURL);
+  if (longURL) {
+    response.redirect(longURL);
+  } else {
+    response
+      .status(400)
+      .send('This page has been deleted, please make new URL');
+  }
 });
 
 // redirect after form submission
 app.post('/urls', (request, response) => {
   const shortURL = generateRandomString();
   const userID = request.session.user_id;
+
   urlDatabase[shortURL] = {
     longURL: request.body.longURL,
     userID,
@@ -118,24 +126,69 @@ app.post('/urls', (request, response) => {
 // key: request.params.shortURL, value: urlDatabase[request.params.shortURL]
 app.get('/urls/:shortURL', (request, response) => {
   const userID = request.session.user_id;
-  const templateVars = {
-    shortURL: request.params.shortURL,
-    longURL: urlDatabase[request.params.shortURL].longURL,
-    user: users[userID],
-  };
-  response.render('urls_show', templateVars);
+  const liveUrl = urlDatabase[request.params.shortURL];
+  console.log('test one: ', liveUrl);
+  if (userID) {
+    if (liveUrl) {
+      const templateVars = {
+        shortURL: request.params.shortURL,
+        longURL: urlDatabase[request.params.shortURL].longURL,
+        user: users[userID],
+      };
+      response.render('urls_show', templateVars);
+    } else {
+      response
+        .status(404)
+        .send('This page has been deleted, please make new URL');
+    }
+  } else {
+    response.status(401).send('Please login to perform this action');
+    // error number control
+    // Client error responses
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+  }
+});
+
+app.get('/urls/:shortURL/delete', (request, response) => {
+  const userID = request.session.user_id;
+  const { shortURL } = request.params;
+  const liveUrl = urlDatabase[request.params.shortURL];
+
+  if (userID) {
+    if (liveUrl) {
+      const userURLS = urlsForUser(userID, urlDatabase);
+      if (Object.keys(userURLS).includes(shortURL)) {
+        delete urlDatabase[shortURL];
+        response.redirect('/urls');
+      } else {
+        response
+          .status(400)
+          .send('You do not have permissions to delete urls.');
+      }
+    } else {
+      response
+        .status(404)
+        .send('This page has been deleted, please make new URL');
+    }
+  } else {
+    response.status(401).send('Please login to perform this action');
+  }
 });
 
 app.post('/urls/:shortURL/delete', (request, response) => {
   const userID = request.session.user_id;
   const { shortURL } = request.params;
 
-  const userURLS = urlsForUser(userID, urlDatabase);
-  if (Object.keys(userURLS).includes(shortURL)) {
-    delete urlDatabase[shortURL];
-    response.redirect('/urls');
+  if (userID) {
+    const userURLS = urlsForUser(userID, urlDatabase);
+    if (Object.keys(userURLS).includes(shortURL)) {
+      delete urlDatabase[shortURL];
+      response.redirect('/urls');
+    } else {
+      response.status(400).send('You do not have permissions to delete urls.');
+    }
   } else {
-    response.status(400).send('You do not have permissions to delete urls.');
+    response.status(401).send('Please login to perform this action');
   }
 });
 
@@ -144,12 +197,16 @@ app.post('/urls/:id', (request, response) => {
   const shortURL = request.params.id;
   const userID = request.session.user_id;
 
-  const userURLS = urlsForUser(userID, urlDatabase);
-  if (Object.keys(userURLS).includes(shortURL)) {
-    urlDatabase[shortURL].longURL = longURL;
-    response.redirect('/urls');
+  if (userID) {
+    const userURLS = urlsForUser(userID, urlDatabase);
+    if (Object.keys(userURLS).includes(shortURL)) {
+      urlDatabase[shortURL].longURL = longURL;
+      response.redirect('/urls');
+    } else {
+      response.status(400).send('You do not have permissions to edit urls.');
+    }
   } else {
-    response.status(400).send('You do not have permissions to edit urls.');
+    response.status(401).send('Please login to perform this action');
   }
 });
 

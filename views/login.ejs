@@ -26,6 +26,11 @@
       <div class="container">
         <div class="row justify-content-md-center">
           <div class="col-sm-6">
+            <% if(!user){ %>
+            <h2>Please login from here</h2>
+            <% } else { %>
+            <h2>You are successfully login</h2>
+            <% } %>
             <form action="/login" method="POST">
               <div class="form-group">
                 <label for="exampleInputEmail1">Email address</label>

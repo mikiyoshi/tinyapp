@@ -1,5 +1,7 @@
 ##tinyApp
 
+TinyApp makes it easy for users to manage their favorite URLs
+
 ## Installation
 
 # Node.js

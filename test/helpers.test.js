@@ -5,8 +5,8 @@ const { getUserByEmail } = require('../helpers.js');
 const testUsers = {
   userRandomID: {
     id: 'userRandomID',
-    email: 'user@example.com',
-    password: 'purple-monkey-dinosaur',
+    email: 'abcd@example.com',
+    password: 'zzzz',
   },
   user2RandomID: {
     id: 'user2RandomID',

@@ -21,6 +21,7 @@
 
     <main style="margin: 1em">
       <h3>My URLs</h3>
+      <% if(user){ %>
       <table class="table">
         <thead>
           <tr>
@@ -31,7 +32,15 @@
           </tr>
         </thead>
         <tbody>
-          <% for(let url in urls) { %>
+          <% if (!Object.keys(urls).length) { %>
+          <tr>
+            <td colspan="4">
+              <a href="/urls/new" class="btn btn-outline-primary"
+                >Create New URL</a
+              >
+            </td>
+          </tr>
+          <% } %><% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
             <td><%= urls[url].longURL %></td>
@@ -49,6 +58,9 @@
           <% } %>
         </tbody>
       </table>
+      <% } else { %>
+      <h2>Please <a href="/login">login</a> to perform this action</h2>
+      <% } %>
     </main>
     <!-- Bootstrap JS -->
     <script
